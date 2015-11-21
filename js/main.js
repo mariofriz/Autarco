@@ -2,17 +2,20 @@ var Zone = Class.extend({
   init: function(name){
     // Variables
     this.name = name;
-    this.$element = $(name);
+    this.$element = $('#' + name);
+    console.log(this.$element);
     this.$sprinkleButton = this.$element.find('.sprinkle');
     this.$lampButton = this.$element.find('.lamp');
+    console.log(this.$lampButton);
     this.$icon = this.$element.find('.icon');
 
     // Listeners
-    this.$lampButton.click(this.onClickLampButton);
+    this.$lampButton.on('click', this.onClickLampButton);
   },
-
+  
   onClickLampButton: function() {
-
+    console.log(this.name);
+    this.$lampButton.addClass('active');
   }
 });
 
@@ -66,9 +69,7 @@ var Event = Class.extend({
 
 
 $(document).ready(function() {
-    $('.toggle.button').click(function() {
-        $(this).toggleClass('active');
-    });
+    var potager = new Zone("potager");
     $('.async.button').click(function() {
         $(this).toggleClass('loading');
         $('.ui.modal').modal('show');
