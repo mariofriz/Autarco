@@ -22,15 +22,16 @@
           <template v-for="zone in zones">
             <div class="card">
               <div class="content">
-                <i class="right floated big idea icon" v-bind:class="{ 'green': zone.isLit}"></i>
+                <i class="right floated big blue theme icon" v-show="zone.isWatering"></i>
+                <i class="right floated big idea icon" v-bind:class="{'yellow': zone.isLit}"></i>
                 <div class="header">{{ zone.name }}</div>
                 <div v-if="zone.isWatering" class="meta">En cours d'arrosage...</div>
                 <div v-else class="meta">Inactif</div>
               </div>
               <div class="extra content">
                 <div class="ui two basic buttons">
-                  <button class="ui button sprinkle" v-bind:disabled="zone.isWatering" v-bind:class="{'disabled': zone.isWatering}" v-on:click="showModal(zone.id)">Arroser</button>
-                  <button class="ui toggle button" v-on:click="toggleLight(zone.id)" v-bind:class="{'active': zone.isLit}">Lampe</button>
+                  <button class="ui button" v-bind:disabled="!zone.wateringButton" v-bind:class="{'disabled': !zone.wateringButton, 'loading': !zone.wateringButton}" v-on:click="showModal(zone)">Arroser</button>
+                  <button class="ui toggle button" v-bind:disabled="!zone.lightButton" v-bind:class="{'disabled': !zone.lightButton, 'active': !zone.lightButton ? !zone.isLit : zone.isLit }" v-on:click="toggleLight(zone)">Lampe</button>
                 </div>
               </div>
             </div>
@@ -51,7 +52,7 @@
             </div>
             <div class="actions">
               <div class="ui button">Cancel</div>
-              <div class="ui primary button" v-on:click="confirmWatering(zone.id, volume)">OK</div>
+              <div class="ui primary button" v-on:click="confirmWatering(zone, volume)">OK</div>
             </div>
           </div>
         </template>
@@ -60,7 +61,7 @@
         <div class="ui two cards">
           <div class="card">
             <div class="content">
-              <i class="right floated big asterisk icon" v-bind:class="{'green': isPumping, 'loading': isPumping}"></i>
+              <i class="right floated big asterisk icon" v-bind:class="{'blue': isPumping, 'loading': isPumping}"></i>
               <div class="header">Pompe</div>
               <div v-if="isPumping" class="description">Etat: <strong>Actif</strong></div>
               <div v-else class="description">Etat: <strong>Inactif</strong></div>
@@ -76,13 +77,16 @@
           </div>
         </div>
 
-        <!--<h2>Evenements</h2>
-        <div class="ui inverted segment">
-          <div class="ui inverted small progress">
-            <div class="bar"></div>
-            <p class="label"></p>
+        <h2>Evenements en cours</h2>
+        <p v-show="events.length == 0">Aucun événement en cours.</p>
+        <template v-for="event in events">
+          <div class="ui inverted segment">
+            <div class="ui teal inverted small progress" data-percent="{{ event.percent }}">
+              <div class="bar"></div>
+              <p class="label">{{ event.zone }}: En arrosage...</p>
+            </div>
           </div>
-        </div>-->
+        </template>
 
       </main>
 
