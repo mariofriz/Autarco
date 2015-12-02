@@ -2,7 +2,7 @@ new Vue({
     el: '#app',
     data: {
         zones: [
-            { 
+            {
                 id: 0,
                 name: "Potager",
                 isWatering: true,
@@ -10,7 +10,7 @@ new Vue({
                 wateringButton: true,
                 lightButton: true,
             },
-            { 
+            {
                 id: 1,
                 name: "Jardin",
                 isWatering: false,
@@ -37,7 +37,7 @@ new Vue({
                     return true;
                 }
             }
-            
+
             return false;
         }
     },
@@ -48,35 +48,48 @@ new Vue({
     methods: {
         update: function() {
             // Get new data from service
-            $.get("/autarco/update", function(data, status){
-                alert("Data: " + data + "\nStatus: " + status);
-                this.updateUI(data);
+            var that = this;
+            $.get("/cgi-bin/Controller.py?action=getInfos", function(data, status){
+                var result = JSON.parse(data);
+                console.log(result);
+                that.updateUI(result);
             });
         },
         updateUI: function(data) {
-            // Update local data
-            this.zones = data.zones;
-            this.system = data.system;
-            this.events = data.events;
+            // Update lights
+            console.log(data.light1);
+            this.zones[0].isLit = !!+data.light1;
+            console.log(this.zones[0].isLit);
+            this.zones[1].isLit = !!+data.light2;
+            // Update watering
+            this.zones[0].isWatering = !!+data.sprinkler1;
+            this.zones[1].isWatering = !!+data.sprinkler2;
+            // Update volume counter
+            // TODO
             // Update progress bars
             $('.progress').progress();
         },
         toggleLight: function(zone) {
-            var data = {
-                zoneId: zone.id,
-            };
+            var data = {};
+            if (zone.id == 0) {
+                data.light1 = !this.zones[zone.id].isLit;
+            }
+            else if (zone.id == 1) {
+                data.light2 = !this.zones[zone.id].isLit;
+            }
             // Post Request to toggle light
-            $.post("/autarco/light", data, function(data, status){
-                alert("Data: " + data + "\nStatus: " + status);
+            $.get("/cgi-bin/Controller.py?action=set"+, data, function(data, status){
+                var result = JSON.parse(data);
+                console.log(result);
                 // Update UI
-                this.updateUI(data);
+                // this.updateUI(result);
 
                 // Once light has been switched, turn button back on
                 zone.lightButton = true;
             });
             // Deactive light switch
             zone.lightButton = false;
-            
+
         },
         showModal: function(zone) {
             $('#modal-' + zone.id).modal('show');
