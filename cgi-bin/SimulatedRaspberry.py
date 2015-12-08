@@ -45,6 +45,7 @@ class SimulatedRaspberry:
     gpios.append(gpio18)
     gpios.append(gpio19)
     gpios.append(gpio20)
+    volume = 0
 
     def getAllGpios(self):
         return self.gpios
@@ -64,6 +65,7 @@ class SimulatedRaspberry:
         export = [];
         for i in range(0, 20):
             export.append(self.gpios[i].getValue())
+        export.append(self.volume)
         return json.dumps(export)
         
     def importJson(self, content):
@@ -71,4 +73,5 @@ class SimulatedRaspberry:
         for i in range(0,20):
             self.gpios[i] = SimulatedGPIO()
             self.gpios[i].setValue(imp[i])
+        self.volume = imp[20]
     

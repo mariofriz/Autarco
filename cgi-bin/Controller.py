@@ -3,7 +3,7 @@ import cgi;
 import cgitb;
 import json;
 from SimulatedDriver import *;
-from Sprinkler import *;
+from Sprinkler2 import *;
 from SprinklerSimulator import *;
 cgitb.enable()
 
@@ -11,7 +11,13 @@ arguments = cgi.FieldStorage()
 driver = SimulatedDriver()
 
 def dumpInfos():
-    data = {'light1':driver.getLight(0),'light2':driver.getLight(1),'sprinkler1':driver.getSprinkler(0),'sprinkler2':driver.getSprinkler(1), 'pump':driver.getPump()}
+    data = {
+        'light1': driver.getLight(0),
+        'light2': driver.getLight(1),
+        'sprinkler1': driver.getSprinkler(0),
+        'sprinkler2': driver.getSprinkler(1), 
+        'volume': driver.raspberry.volume
+    }
     data_json = json.dumps(data)
     print (data_json)
 
@@ -30,10 +36,11 @@ if "action" in arguments:
             curWater="water"+str((i+1))
             if curWater in arguments:
                 #print(curWater+" put to"+str(arguments.getvalue(curWater)))
-                quantity = arguments.getvalue(curWater)
-                sp = Sprinkler(quantity, driver.gpioSprinklers[i], driver)
-                sps = SprinklerSimulator(driver)
+                quantity = int(float(arguments.getvalue(curWater)))
+                sp = Sprinkler2(quantity, driver.gpioSprinklers[i], driver)
+                #sps = SprinklerSimulator(driver)
                 sp.start()
-                sps.start()
+                #sps.start()
+                sp.join()
         driver.save()
         dumpInfos()

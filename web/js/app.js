@@ -7,7 +7,6 @@ new Vue({
                 name: "Potager",
                 isWatering: false,
                 isLit: false,
-                wateringButton: true,
                 lightButton: true,
             },
             {
@@ -15,12 +14,11 @@ new Vue({
                 name: "Jardin",
                 isWatering: false,
                 isLit: false,
-                wateringButton: true,
                 lightButton: true,
             }
         ],
         system: {
-            counter: 200
+            counter: 0
         },
         events: [
             {
@@ -44,7 +42,7 @@ new Vue({
     },
     ready: function() {
         this.update();
-        setInterval(this.update, 7000);
+        setInterval(this.update, 3000);
     },
     methods: {
         update: function() {
@@ -67,23 +65,23 @@ new Vue({
             this.zones[0].isWatering = !!+data.sprinkler1;
             this.zones[1].isWatering = !!+data.sprinkler2;
             // Update volume counter
-            // TODO
+            this.system.counter = data.volume;
             // Update progress bars
             $('.progress').progress();
         },
         toggleLight: function(zone) {
             var that = this;
-            var data = {
+            var param = {
                 action: 'set'
             };
             if (zone.id == 0) {
-                data.light1 = this.zones[zone.id].isLit?0:1;
+                param.light1 = this.zones[zone.id].isLit ? 0 : 1;
             }
             else if (zone.id == 1) {
-                data.light2 = this.zones[zone.id].isLit?0:1;
+                param.light2 = this.zones[zone.id].isLit ? 0 : 1;
             }
             // Post Request to toggle light
-            $.get("/cgi-bin/Controller.py", data, function(data, status){
+            $.get("/cgi-bin/Controller.py", param, function(data, status){
                 var result = JSON.parse(data);
                 console.log(result);
                 // Update UI
@@ -94,7 +92,6 @@ new Vue({
             });
             // Deactive light switch
             zone.lightButton = false;
-
         },
         showModal: function(zone) {
             $('#modal-' + zone.id).modal('show');
@@ -102,26 +99,24 @@ new Vue({
         confirmWatering: function(zone, volume) {
             var that = this;
             if (volume > 0) {
-                var data ={};
+                var param = {
+                    action: 'set'
+                };
                     
-                  if (zone.id == 0) {
-                        data.water1 = volume;
-                    }
-                    else if (zone.id == 1) {
-                       data.water2 = volume;
-                    }
-                
-                
-                $.post("/cgi-bin/Controller.py", data, function(data, status){
-                    alert("Data: " + data + "\nStatus: " + status);
+                if (zone.id == 0) {
+                    param.water1 = volume;
+                }
+                else if (zone.id == 1) {
+                    param.water2 = volume;
+                }
+                // Set to watering modus
+                zone.isWatering = true;
+                $.post("/cgi-bin/Controller.py", param, function(data, status){
+                    var result = JSON.parse(data);
+                    //console.log(result);
                     // Update UI
-                    that.updateUI(data);
-
-                    // Once event is registered reactivate button
-                    zone.wateringButton = true;
+                    that.updateUI(result);
                 });
-                // Deactivate watering button
-                zone.wateringButton = false;
             }
             // Water those !
             this.volume = '';
